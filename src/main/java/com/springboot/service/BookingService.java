@@ -109,7 +109,7 @@ public class BookingService implements IBookingService {
 		logger.debug("Inside retrieveCostOfBreakfast");
 		double breakfastCost = 0.0;
 		if(HotelConstants.TRUE.equalsIgnoreCase(bookingDetailsDTO.getBreakfastOption())){
-			breakfastCost = bookingDetailsDTO.getNoOfMembers() * HotelConstants.BREAKFAST_COST;
+			breakfastCost = bookingDetailsDTO.getNoOfMembers() * HotelConstants.BREAKFAST_COST_TWOFIFTY;
 		}
 		logger.debug("Exiting retrieveCostOfBreakfast");
 		return breakfastCost;
