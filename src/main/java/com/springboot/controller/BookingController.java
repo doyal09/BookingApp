@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.springboot.dto.BookingDetailsDTO;
 import com.springboot.entity.BookingDetails;
 import com.springboot.service.BookingService;
+import com.springboot.dto.CustomerDetailsDTO;
 
 @RestController
 public class BookingController {
@@ -100,7 +101,9 @@ public class BookingController {
 			return new ResponseEntity<String>("Unable to update. No booking found with the booking id ",
 					HttpStatus.NOT_FOUND);
 		}
-		currentBookingDetails.setCustomerId(bookingDetailsDTO.getCustomerId());
+		CustomerDetailsDTO customerDetailsDTO = bookingDetailsDTO.getCustomerDetailsDTO();
+		// set new customer id
+		currentBookingDetails.setCustomerId(customerDetailsDTO.getCustomerId());
 		bookingService.updateBooking(currentBookingDetails);
 		return new ResponseEntity<BookingDetails>(currentBookingDetails, HttpStatus.OK);
 

@@ -11,106 +11,146 @@ import org.springframework.stereotype.Service;
 import com.springboot.constants.HotelConstants;
 import com.springboot.controller.BookingController;
 import com.springboot.dto.BookingDetailsDTO;
+import com.springboot.dto.CustomerDetailsDTO;
+import com.springboot.dto.RoomDetailsDTO;
 import com.springboot.entity.BookingDetails;
+import com.springboot.entity.Customer;
 import com.springboot.entity.RoomDetails;
 import com.springboot.repository.BookingRepository;
+import com.springboot.repository.CustomerRepository;
 
 @Service
-public class BookingService implements IBookingService {
+public class BookingService {
 	@Autowired
 	private BookingRepository bookingRepository;
+	@Autowired
+	private CustomerRepository customerRepository;
+
 	Logger logger = LoggerFactory.getLogger(BookingController.class);
-	
-	@Override
+
+	/*
+	 * Method in SERVICE class to get the Booking Details by ROOM id returns
+	 * object of BookingDetails
+	 */
 	public BookingDetails getBookingByRoomId(Integer roomId) {
 		logger.debug("Entering getBookingByRoomId");
 		BookingDetails obj = bookingRepository.getBookingByRoomId(roomId);
 		logger.debug("Exiting getBookingByRoomId");
 		return obj;
 	}
-	
-	@Override
+
+	/*
+	 * Method in SERVICE to get the Booking Details by Booking id returns object
+	 * of BookingDetails
+	 */
 	public BookingDetails getBookingByBookingId(Integer bookingId) {
 		logger.debug("Entering getBookingByBookingId");
 		BookingDetails obj = bookingRepository.getBookingByBookingId(bookingId);
 		logger.debug("Exiting getBookingByBookingId");
 		return obj;
 	}
-	
-	@Override
+
+	/*
+	 * Method in SERVICE to get the Booking Details by Customer ID returns
+	 * object of BookingDetails
+	 */
 	public BookingDetails getBookingByCustomerId(Integer customerId) {
 		logger.debug("Entering getBookingByCustomerId");
 		BookingDetails obj = bookingRepository.getBookingByCustomerId(customerId);
 		logger.debug("Exiting getBookingByCustomerId");
 		return obj;
-		
+
 	}
-	
-	
-	@Override
+
+	/*
+	 * Method in SERVICE to create a NEW BOOKING, CUSTOMER and update ROOM
+	 * DETAILS returns object of BookingDetailsDTO
+	 */
+
 	public BookingDetailsDTO createNewBooking(BookingDetailsDTO bookingDetailsDTO) {
 		logger.debug("Entering createNewBooking");
 		// Generate random booking id
 		// 9999 is the maximum and the 1000 is our minimum
+
+		double totalBookingCost = 0.0;
+
 		Random rand = new Random();
 		int bookingId = rand.nextInt(9999) + 1000;
-		logger.debug("Booking ID is: "+bookingId);
+		int customerId = bookingId + HotelConstants.ONE;
+		logger.debug("Booking ID is:  " + bookingId);
+		logger.debug("Customer ID is: " + customerId);
 
+		// Entity object for BookingDetailsDTO, RoomDetailsDTO ,
+		// CustomerDetailsDTO
 		BookingDetails bookingDetailsObject = new BookingDetails();
-		double totalBookingCost = 0.0;
-		
-		// Get the list of rooms
-		List<RoomDetails> rooms = bookingDetailsDTO.getRoomDetails();
-		for (RoomDetails roomDetails : rooms) {
-			if (HotelConstants.SINGLE.equalsIgnoreCase(roomDetails.getSize())
-					&& HotelConstants.TRUE.equalsIgnoreCase(roomDetails.getAvailability())) {
-				logger.debug("RoomType is: "+roomDetails.getSize()+ "and Room Availability is: "+roomDetails.getAvailability());
+		RoomDetails roomDetailsObject = new RoomDetails();
+		Customer customerDetailsObject = new Customer();
+
+		// Get the list of rooms from the bookingDetailsDTO
+		List<RoomDetailsDTO> rooms = bookingDetailsDTO.getRoomDetailsDTO();
+		// Get the customer details from the bookingDetailsDTO
+		CustomerDetailsDTO customerDTO = bookingDetailsDTO.getCustomerDetailsDTO();
+		customerDTO.setCustomerId(customerId);
+		for (RoomDetailsDTO roomDetailsDTO : rooms) {
+			if (HotelConstants.SINGLE.equalsIgnoreCase(roomDetailsDTO.getSize())
+					&& HotelConstants.TRUE.equalsIgnoreCase(roomDetailsDTO.getAvailability())) {
+				logger.debug("RoomType is: " + roomDetailsDTO.getSize() + "and Room Availability is: "
+						+ roomDetailsDTO.getAvailability());
 				totalBookingCost = totalBookingCost + HotelConstants.SINGLE_PRICE;
-				logger.debug("Total booking Cost in if part is : "+totalBookingCost);
+				logger.debug("Total booking Cost in if part is : " + totalBookingCost);
 			} else {
-				logger.debug("RoomType is: "+roomDetails.getSize()+ "and Room Availability is: "+roomDetails.getAvailability());
+				logger.debug("RoomType is: " + roomDetailsDTO.getSize() + "and Room Availability is: "
+						+ roomDetailsDTO.getAvailability());
 				totalBookingCost = totalBookingCost + HotelConstants.DOUBLE_PRICE;
-				logger.debug("Total booking Cost in else part : "+totalBookingCost);
+				logger.debug("Total booking Cost in else part : " + totalBookingCost);
 			}
 
 			bookingDetailsObject.setBookingId(bookingId);
-			bookingDetailsObject.setCustomerId(bookingDetailsDTO.getCustomerId());
-			bookingDetailsObject.setRoomId(roomDetails.getId());
-			bookingDetailsObject.setCheckIn(bookingDetailsDTO.getCheckIn());
-			bookingDetailsObject.setCheckOut(bookingDetailsDTO.getCheckOut());
-			//updateRoomDetails(roomDetails.getId());
+			bookingDetailsObject.setCustomerId(customerId);
+			bookingDetailsObject.setRoomId(roomDetailsDTO.getId());
+			roomDetailsObject.setAvailability(HotelConstants.FALSE);
+			// updateRoomDetails(roomDetails.getId());
 			bookingRepository.save(bookingDetailsObject);
 		}
-		//get breakfast cost for the number of members
-		double breakfastInclusionCost = retrieveCostOfBreakfast(bookingDetailsDTO);
-		logger.debug("Breakfast inclusion Cost is : "+breakfastInclusionCost);
-		totalBookingCost = totalBookingCost + breakfastInclusionCost;
-		logger.debug("Total Booking cost after inclusion of Breakfast is: "+totalBookingCost);
-		
-		//return the DTO with bookingId and total booking cost
+		// Update the Customer table with details
+		customerDetailsObject.setCustomerId(customerId);
+		customerDetailsObject.setCustomerFirstName(customerDTO.getCustFirstName());
+		customerDetailsObject.setCustomerLastName(customerDTO.getCustLastName());
+		customerDetailsObject.setBreakfastOption(customerDTO.getBreakfastOption());
+		customerDetailsObject.setNoOfMembers(customerDTO.getNoOfMembers());
+		customerDetailsObject.setCheckIn(customerDTO.getCheckIn());
+		customerDetailsObject.setCheckOut(customerDTO.getCheckOut());
+		customerRepository.save(customerDetailsObject);
+
+		// get breakfast cost for the number of members
+		if (HotelConstants.TRUE.equalsIgnoreCase(customerDTO.getBreakfastOption())) {
+			totalBookingCost = totalBookingCost + retrieveCostOfBreakfast(customerDTO);
+			logger.debug("Total Booking cost after inclusion of Breakfast is: " + totalBookingCost);
+		}
+		// return the DTO with bookingId and total booking cost
 		bookingDetailsDTO.setBookingId(bookingId);
 		bookingDetailsDTO.setTotalCost(totalBookingCost);
+		bookingDetailsDTO.setCustomerId(customerId);
 		logger.debug("Exiting createNewBooking");
 		return bookingDetailsDTO;
 	}
-	
-	
-	@Override
+
+	/*
+	 * Method in SERVICE class to Update an existing booking
+	 */
 	public void updateBooking(BookingDetails bookingDetails) {
 		logger.debug("Inside updateBooking method");
 		bookingRepository.save(bookingDetails);
 		logger.debug("Exiting updateBooking");
 	}
-	
+
 	/*
-	 * retrieve breakfast inclusion cost
+	 * Method in SERVICE class to retrieve breakfast inclusion cost
 	 */
-	public double retrieveCostOfBreakfast(BookingDetailsDTO bookingDetailsDTO) {
+	public double retrieveCostOfBreakfast(CustomerDetailsDTO customerDetailsDTO) {
 		logger.debug("Inside retrieveCostOfBreakfast");
-		double breakfastCost = 0.0;
-		if(HotelConstants.TRUE.equalsIgnoreCase(bookingDetailsDTO.getBreakfastOption())){
-			breakfastCost = bookingDetailsDTO.getNoOfMembers() * HotelConstants.BREAKFAST_COST_TWOFIFTY;
-		}
+		double breakfastCost = customerDetailsDTO.getNoOfMembers() * HotelConstants.BREAKFAST_COST;
+		logger.debug("Breakfast Cost is: " + breakfastCost);
 		logger.debug("Exiting retrieveCostOfBreakfast");
 		return breakfastCost;
 	}
@@ -119,8 +159,8 @@ public class BookingService implements IBookingService {
 	 * Update availability of Room based on Room Id
 	 */
 	public void updateRoomDetails(Integer roomId) {
-			//bookingRepository.updateRoomDetails(roomId);
+		// bookingRepository.updateRoomDetails(roomId);
 
-		}
+	}
 
 }

@@ -23,6 +23,8 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.springboot.MyApplication;
 import com.springboot.dto.BookingDetailsDTO;
+import com.springboot.dto.CustomerDetailsDTO;
+import com.springboot.dto.RoomDetailsDTO;
 import com.springboot.entity.RoomDetails;
 
 @RunWith(SpringRunner.class)
@@ -32,6 +34,8 @@ public class BookingDetailsTest {
 	@Autowired
 	private WebApplicationContext context;
 	private BookingDetailsDTO bookingDetailsDTO;
+	private CustomerDetailsDTO customerDetailsDTO;
+	private RoomDetailsDTO roomDetailsDTO;
 	private MockMvc mvc;
 
 	@Before
@@ -39,64 +43,78 @@ public class BookingDetailsTest {
 		mvc = MockMvcBuilders.webAppContextSetup(context).build();
 	}
 
-	// addBooking
+	/*
+	 * 
+	 */
 	@Test
 	public void createNewBookingTest() throws Exception {
-		
-		List<RoomDetails> rooms = new ArrayList<RoomDetails>();
-		RoomDetails roomDetails = new RoomDetails();
-		roomDetails.setId(1);
-		roomDetails.setSize("Single");
-		roomDetails.setAvailability("true");
-		rooms.add(roomDetails);
-				
-		roomDetails.setId(5);
-		roomDetails.setSize("Double");
-		roomDetails.setAvailability("true");
-				
-		rooms.add(roomDetails);
-		
+
+		// Populate the roomDetailsDTO
+		List<RoomDetailsDTO> rooms = new ArrayList<RoomDetailsDTO>();
+		roomDetailsDTO = new RoomDetailsDTO();
+		roomDetailsDTO.setId(1);
+		roomDetailsDTO.setSize("Single");
+		roomDetailsDTO.setAvailability("true");
+		rooms.add(roomDetailsDTO);
+
+		roomDetailsDTO.setId(5);
+		roomDetailsDTO.setSize("Double");
+		roomDetailsDTO.setAvailability("true");
+
+		rooms.add(roomDetailsDTO);
+
+		// populate the CustomerDetailsDTO
+		customerDetailsDTO = new CustomerDetailsDTO();
 		Date checkInDate = Date.valueOf("2018-8-31");
 		Date checkOutDate = Date.valueOf("2018-9-9");
-		
+		customerDetailsDTO.setCustFirstName("Johnny");
+		customerDetailsDTO.setCustLastName("Bravo");
+		customerDetailsDTO.setCheckIn(checkInDate);
+		customerDetailsDTO.setCheckOut(checkOutDate);
+		customerDetailsDTO.setBreakfastOption("true");
+		customerDetailsDTO.setNoOfMembers(4);
+
+		// Populate Booking Details DTO
 		bookingDetailsDTO = new BookingDetailsDTO();
-		bookingDetailsDTO.setCustomerId(1111);
-		bookingDetailsDTO.setCheckIn(checkInDate);
-		bookingDetailsDTO.setCheckOut(checkOutDate);
-		bookingDetailsDTO.setBreakfastOption("true");
-		bookingDetailsDTO.setRoomDetails(rooms);
-		bookingDetailsDTO.setNoOfMembers(5);
-		
+		bookingDetailsDTO.setRoomDetailsDTO(rooms);
+		bookingDetailsDTO.setCustomerDetailsDTO(customerDetailsDTO);
+
 		mvc.perform(MockMvcRequestBuilders.post("/create").content(toJson(bookingDetailsDTO))
 				.contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isCreated())
-				.andExpect(jsonPath("$.bookingId").isNumber())
+				.andExpect(status().isCreated()).andExpect(jsonPath("$.bookingId").isNumber())
 				.andExpect(jsonPath("$.totalCost").isNumber());
 
 	}
 
-	// retrieve booking by room id
+	/*
+	 * 
+	 */
 	@Test
 	public void getBookingByRoomIdTest() throws Exception {
 
-		List<RoomDetails> rooms = new ArrayList<RoomDetails>();
-		RoomDetails roomDetails = new RoomDetails();
-		roomDetails.setId(3);
-		roomDetails.setSize("Double");
-		roomDetails.setAvailability("true");
-				
-		rooms.add(roomDetails);
-		
+		// Populate the roomDetailsDTO
+		List<RoomDetailsDTO> rooms = new ArrayList<RoomDetailsDTO>();
+		roomDetailsDTO = new RoomDetailsDTO();
+		roomDetailsDTO.setId(3);
+		roomDetailsDTO.setSize("Double");
+		roomDetailsDTO.setAvailability("true");
+		rooms.add(roomDetailsDTO);
+
+		// populate the CustomerDetailsDTO
+		customerDetailsDTO = new CustomerDetailsDTO();
 		Date checkInDate = Date.valueOf("2018-8-31");
 		Date checkOutDate = Date.valueOf("2018-9-9");
-		
+		customerDetailsDTO.setCustFirstName("Sourav");
+		customerDetailsDTO.setCustLastName("Ganguly");
+		customerDetailsDTO.setCheckIn(checkInDate);
+		customerDetailsDTO.setCheckOut(checkOutDate);
+		customerDetailsDTO.setBreakfastOption("true");
+		customerDetailsDTO.setNoOfMembers(3);
+
+		// Populate Booking Details DTO
 		bookingDetailsDTO = new BookingDetailsDTO();
-		bookingDetailsDTO.setCustomerId(1112);
-		bookingDetailsDTO.setCheckIn(checkInDate);
-		bookingDetailsDTO.setCheckOut(checkOutDate);
-		bookingDetailsDTO.setBreakfastOption("true");
-		bookingDetailsDTO.setRoomDetails(rooms);
-		bookingDetailsDTO.setNoOfMembers(5);
+		bookingDetailsDTO.setRoomDetailsDTO(rooms);
+		bookingDetailsDTO.setCustomerDetailsDTO(customerDetailsDTO);
 
 		mvc.perform(MockMvcRequestBuilders.post("/create").content(toJson(bookingDetailsDTO))
 				.contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
@@ -104,65 +122,84 @@ public class BookingDetailsTest {
 
 		mvc.perform(MockMvcRequestBuilders.get("/getBookingByRoomId/2").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andExpect(jsonPath("$.id").isNumber())
-				.andExpect(jsonPath("$.customerId").isNumber()).andExpect(jsonPath("$.roomId").isNumber())
-				.andExpect(jsonPath("$.checkIn").isString())
-				.andExpect(jsonPath("$.checkOut").isString());
+				.andExpect(jsonPath("$.customerId").isNumber()).andExpect(jsonPath("$.roomId").isNumber());
 
 	}
 
-	// retrieve booking by customer id
+	/*
+	 * 
+	 */
 	@Test
 	public void getBookingByCustomerIdTest() throws Exception {
+		// Populate the roomDetailsDTO
+		List<RoomDetailsDTO> rooms = new ArrayList<RoomDetailsDTO>();
+		roomDetailsDTO = new RoomDetailsDTO();
+		roomDetailsDTO.setId(2);
+		roomDetailsDTO.setSize("Single");
+		roomDetailsDTO.setAvailability("true");
+		rooms.add(roomDetailsDTO);
 
-		List<RoomDetails> rooms = new ArrayList<RoomDetails>();
-		RoomDetails roomDetails = new RoomDetails();
-		roomDetails.setId(2);
-		roomDetails.setSize("Single");
-		roomDetails.setAvailability("true");
-		rooms.add(roomDetails);
-				
+		// Populate customer details DTO
+		customerDetailsDTO = new CustomerDetailsDTO();
 		Date checkInDate = Date.valueOf("2018-8-31");
 		Date checkOutDate = Date.valueOf("2018-9-9");
-		
+		customerDetailsDTO.setCustFirstName("Daniel");
+		customerDetailsDTO.setCustLastName("Radcliffe");
+		customerDetailsDTO.setCheckIn(checkInDate);
+		customerDetailsDTO.setCheckOut(checkOutDate);
+		customerDetailsDTO.setBreakfastOption("false");
+		customerDetailsDTO.setNoOfMembers(3);
+
+		// Populate booking details DTO
 		bookingDetailsDTO = new BookingDetailsDTO();
-		bookingDetailsDTO.setCustomerId(1113);
-		bookingDetailsDTO.setCheckIn(checkInDate);
-		bookingDetailsDTO.setCheckOut(checkOutDate);
-		bookingDetailsDTO.setBreakfastOption("false");
-		bookingDetailsDTO.setRoomDetails(rooms);
+		bookingDetailsDTO.setRoomDetailsDTO(rooms);
+		bookingDetailsDTO.setCustomerDetailsDTO(customerDetailsDTO);
 
-		mvc.perform(MockMvcRequestBuilders.post("/create").content(toJson(bookingDetailsDTO))
-				.contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isCreated());
+		MvcResult result = mvc
+				.perform(MockMvcRequestBuilders.post("/create").content(toJson(bookingDetailsDTO))
+						.contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isCreated()).andExpect(jsonPath("$.totalCost").isNumber())
+				.andExpect(jsonPath("$.bookingId").isNumber()).andExpect(jsonPath("$.customerId").isNumber())
+				.andReturn();
 
-		mvc.perform(MockMvcRequestBuilders.get("/getBookingByCustomerId/1113")
-				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("$").isNotEmpty())
-				.andExpect(jsonPath("$.id").isNumber()).andExpect(jsonPath("$.customerId").isNumber())
-				.andExpect(jsonPath("$.roomId").isNumber())
-				.andExpect(jsonPath("$.checkIn").isString()).andExpect(jsonPath("$.checkOut").isString());
+		JSONObject json = new JSONObject(result.getResponse().getContentAsString());
+		Integer id = (Integer) json.getInt("customerId");
+
+		mvc.perform(MockMvcRequestBuilders.get("/getBookingByCustomerId/" + id).accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk()).andExpect(jsonPath("$").isNotEmpty())
+				.andExpect(jsonPath("$.customerId").isNumber()).andExpect(jsonPath("$.roomId").isNumber());
 
 	}
 
-	// update booking by booking id
+	/*
+	 * 
+	 */
 	@Test
 	public void updateBookingByBookingIdTest() throws Exception {
 
-		List<RoomDetails> rooms = new ArrayList<RoomDetails>();
-		RoomDetails roomDetails = new RoomDetails();
-		roomDetails.setId(4);
-		roomDetails.setSize("Double");
-		roomDetails.setAvailability("true");
-		rooms.add(roomDetails);
-				
+		// Populate Room details DTO
+		List<RoomDetailsDTO> rooms = new ArrayList<RoomDetailsDTO>();
+		roomDetailsDTO = new RoomDetailsDTO();
+		roomDetailsDTO.setId(4);
+		roomDetailsDTO.setSize("Double");
+		roomDetailsDTO.setAvailability("true");
+		rooms.add(roomDetailsDTO);
+
+		// Populate Customer details DTO
+		customerDetailsDTO = new CustomerDetailsDTO();
 		Date checkInDate = Date.valueOf("2018-8-31");
 		Date checkOutDate = Date.valueOf("2018-9-9");
-		
+		customerDetailsDTO.setCustFirstName("Virat");
+		customerDetailsDTO.setCustLastName("Kohli");
+		customerDetailsDTO.setCheckIn(checkInDate);
+		customerDetailsDTO.setCheckOut(checkOutDate);
+		customerDetailsDTO.setBreakfastOption("false");
+		customerDetailsDTO.setNoOfMembers(2);
+
+		// Populate booking details DTO
 		bookingDetailsDTO = new BookingDetailsDTO();
-		bookingDetailsDTO.setCustomerId(1114);
-		bookingDetailsDTO.setCheckIn(checkInDate);
-		bookingDetailsDTO.setCheckOut(checkOutDate);
-		bookingDetailsDTO.setBreakfastOption("false");
-		bookingDetailsDTO.setRoomDetails(rooms);
+		bookingDetailsDTO.setRoomDetailsDTO(rooms);
+		bookingDetailsDTO.setCustomerDetailsDTO(customerDetailsDTO);
 
 		MvcResult result = mvc
 				.perform(MockMvcRequestBuilders.post("/create").content(toJson(bookingDetailsDTO))
@@ -173,43 +210,45 @@ public class BookingDetailsTest {
 		JSONObject json = new JSONObject(result.getResponse().getContentAsString());
 		Integer id = (Integer) json.getInt("bookingId");
 
-		bookingDetailsDTO.setCustomerId(1115);
+		// customerDetailsDTO.setCustFirstName("Anushka");
+		// customerDetailsDTO.setCustLastName("Sharma");
+		customerDetailsDTO.setCustomerId(id + 1);
+		bookingDetailsDTO.setCustomerDetailsDTO(customerDetailsDTO);
 
-		mvc.perform(MockMvcRequestBuilders.put("/updateExistingBooking/"+id).content(toJson(bookingDetailsDTO))
+		mvc.perform(MockMvcRequestBuilders.put("/updateExistingBooking/" + id).content(toJson(bookingDetailsDTO))
 				.contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
-		
-		mvc.perform(
-                MockMvcRequestBuilders.get("/getBookingByRoomId/4").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk()).andExpect(jsonPath("$").isNotEmpty())
-                .andExpect(jsonPath("$.bookingId").value(json.get("bookingId")))
-                .andExpect(jsonPath("$.roomId").value(4));
 
+		mvc.perform(MockMvcRequestBuilders.get("/getBookingByRoomId/4").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk()).andExpect(jsonPath("$").isNotEmpty())
+				.andExpect(jsonPath("$.bookingId").value(json.get("bookingId")))
+				.andExpect(jsonPath("$.roomId").value(4));
 
 	}
-	
+
 	// update booking by booking id
-	/*	@Test
-	public void getBookingWithinADateRangeTest() throws Exception {
-
-			Date checkInDate = Date.valueOf("2018-8-31");
-			Date checkOutDate = Date.valueOf("2018-9-9");
-			
-		bookingDetails = new BookingDetails();
-		bookingDetails.setCustomerId(1114);
-		bookingDetails.setCheckIn(checkInDate);
-		bookingDetails.setCheckOut(checkOutDate);
-
-		mvc.perform(MockMvcRequestBuilders.post("/create").content(toJson(bookingDetails))
-				.contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isCreated());
-
-		mvc.perform(
-				MockMvcRequestBuilders.get("/getBookingWithinADateRange/checkIn=2018-8-31&checkOut=2018-9-9")
-						.content(toJson(bookingDetails)).contentType(MediaType.APPLICATION_JSON)
-						.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-
-	}*/
+	/*
+	 * @Test public void getBookingWithinADateRangeTest() throws Exception {
+	 * 
+	 * Date checkInDate = Date.valueOf("2018-8-31"); Date checkOutDate =
+	 * Date.valueOf("2018-9-9");
+	 * 
+	 * bookingDetails = new BookingDetails();
+	 * bookingDetails.setCustomerId(1114);
+	 * bookingDetails.setCheckIn(checkInDate);
+	 * bookingDetails.setCheckOut(checkOutDate);
+	 * 
+	 * mvc.perform(MockMvcRequestBuilders.post("/create").content(toJson(
+	 * bookingDetails))
+	 * .contentType(MediaType.APPLICATION_JSON).accept(MediaType.
+	 * APPLICATION_JSON)) .andExpect(status().isCreated());
+	 * 
+	 * mvc.perform( MockMvcRequestBuilders.get(
+	 * "/getBookingWithinADateRange/checkIn=2018-8-31&checkOut=2018-9-9")
+	 * .content(toJson(bookingDetails)).contentType(MediaType.APPLICATION_JSON)
+	 * .accept(MediaType.APPLICATION_JSON)) .andExpect(status().isOk());
+	 * 
+	 * }
+	 */
 
 	private byte[] toJson(Object r) throws Exception {
 		ObjectMapper map = new ObjectMapper();

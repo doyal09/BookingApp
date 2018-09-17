@@ -8,69 +8,92 @@ import com.springboot.entity.*;
 
 public class BookingDetailsDTO {
 	
-	private Integer id;
 	private Integer bookingId;
 	private Integer customerId;
-	private List<RoomDetails> roomDetails;
-	private String breakfastOption;
-	private Integer noOfMembers;
+	private List<RoomDetailsDTO> roomDetailsDTO;
+	private CustomerDetailsDTO customerDetailsDTO;
 	private double totalCost;
-	private Date checkIn;
-	private Date checkOut;
 	
-	public Integer getId() {
-		return id;
-	}
-	public void setId(Integer id) {
-		this.id = id;
-	}
+	/*
+	 * Getting the booking id
+	 * returns Integer
+	 */
 	public Integer getBookingId() {
 		return bookingId;
 	}
+	
+	/*
+	 * Setting the booking id
+	 * @param Integer bookingId
+	 */
 	public void setBookingId(Integer bookingId) {
 		this.bookingId = bookingId;
 	}
+	
+	/*
+	 * Getting the customerId
+	 * returns Integer customerId
+	 */
 	public Integer getCustomerId() {
 		return customerId;
 	}
+	
+	/*
+	 * Setting the customerId
+	 * @param Integer customerId
+	 */
 	public void setCustomerId(Integer customerId) {
 		this.customerId = customerId;
 	}
-	public List<RoomDetails> getRoomDetails() {
-		return roomDetails;
+	
+	
+	/*
+	 * Getting the RoomDetails
+	 * returns roomDetailsDTO
+	 */
+	public List<RoomDetailsDTO> getRoomDetailsDTO() {
+		return roomDetailsDTO;
 	}
-	public void setRoomDetails(List<RoomDetails> roomDetails) {
-		this.roomDetails = roomDetails;
+	
+	/*
+	 * Setting the roomDetailsDTO
+	 * @param List of RoomDetailDTO
+	 */
+	public void setRoomDetailsDTO(List<RoomDetailsDTO> roomDetailsDTO) {
+		this.roomDetailsDTO = roomDetailsDTO;
 	}
-	public String getBreakfastOption() {
-		return breakfastOption;
+	
+	/*
+	 * Getting the CustomerDetailsDTO
+	 * returns object of CustomerDetailsDTO
+	 */
+	public CustomerDetailsDTO getCustomerDetailsDTO() {
+		return customerDetailsDTO;
 	}
-	public void setBreakfastOption(String breakfastOption) {
-		this.breakfastOption = breakfastOption;
+	
+	/*
+	 * Setting the CustomerDetailsDTO
+	 * @param customerDetailsDTO
+	 */
+	public void setCustomerDetailsDTO(CustomerDetailsDTO customerDetailsDTO) {
+		this.customerDetailsDTO = customerDetailsDTO;
 	}
-	public Integer getNoOfMembers() {
-		return noOfMembers;
-	}
-	public void setNoOfMembers(Integer noOfMembers) {
-		this.noOfMembers = noOfMembers;
-	}
+	
+	/*
+	 * Getting Total Cost of the booking
+	 * returns double
+	 */
+	
 	public double getTotalCost() {
 		return totalCost;
 	}
+	
+	/*
+	 * Setting the total cost of the booking
+	 * @param totalCost
+	 */
 	public void setTotalCost(double totalCost) {
 		this.totalCost = totalCost;
 	}
-	public Date getCheckIn() {
-		return checkIn;
-	}
-	public void setCheckIn(Date checkIn) {
-		this.checkIn = checkIn;
-	}
-	public Date getCheckOut() {
-		return checkOut;
-	}
-	public void setCheckOut(Date checkOut) {
-		this.checkOut = checkOut;
-	}
-	
+		
 }
