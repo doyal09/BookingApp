@@ -102,7 +102,7 @@ public class BookingDetailsTest {
 				.contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isCreated());
 
-		mvc.perform(MockMvcRequestBuilders.get("/getBookingByRoomId/roomId=2").accept(MediaType.APPLICATION_JSON))
+		mvc.perform(MockMvcRequestBuilders.get("/getBookingByRoomId/2").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andExpect(jsonPath("$.id").isNumber())
 				.andExpect(jsonPath("$.customerId").isNumber()).andExpect(jsonPath("$.roomId").isNumber())
 				.andExpect(jsonPath("$.checkIn").isString())
@@ -135,7 +135,7 @@ public class BookingDetailsTest {
 				.contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isCreated());
 
-		mvc.perform(MockMvcRequestBuilders.get("/getBookingByCustomerId/customerId=1113")
+		mvc.perform(MockMvcRequestBuilders.get("/getBookingByCustomerId/1113")
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("$").isNotEmpty())
 				.andExpect(jsonPath("$.id").isNumber()).andExpect(jsonPath("$.customerId").isNumber())
 				.andExpect(jsonPath("$.roomId").isNumber())
@@ -175,11 +175,11 @@ public class BookingDetailsTest {
 
 		bookingDetailsDTO.setCustomerId(1115);
 
-		mvc.perform(MockMvcRequestBuilders.put("/updateExistingBooking/bookingId=" + id).content(toJson(bookingDetailsDTO))
+		mvc.perform(MockMvcRequestBuilders.put("/updateExistingBooking/"+id).content(toJson(bookingDetailsDTO))
 				.contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 		
 		mvc.perform(
-                MockMvcRequestBuilders.get("/getBookingByRoomId/roomId=4").accept(MediaType.APPLICATION_JSON))
+                MockMvcRequestBuilders.get("/getBookingByRoomId/4").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk()).andExpect(jsonPath("$").isNotEmpty())
                 .andExpect(jsonPath("$.bookingId").value(json.get("bookingId")))
                 .andExpect(jsonPath("$.roomId").value(4));

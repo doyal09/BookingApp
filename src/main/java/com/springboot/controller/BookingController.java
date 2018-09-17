@@ -29,7 +29,7 @@ public class BookingController {
 	 * 
 	 * @param response, the HttpServletResponse object
 	 */
-	@RequestMapping(value = "/getBookingByRoomId/roomId={roomId}", method = RequestMethod.GET)
+	@RequestMapping(value = "/getBookingByRoomId/{roomId}", method = RequestMethod.GET)
 	public ResponseEntity<?> getBookingByRoomId(@PathVariable("roomId") Integer roomId) {
 		logger.debug("INSIDE getBookingByRoomId");
 		try {
@@ -52,7 +52,7 @@ public class BookingController {
 	 * 
 	 * @param response, the HttpServletResponse object
 	 */
-	@RequestMapping(value = "/getBookingByCustomerId/customerId={customerId}", method = RequestMethod.GET)
+	@RequestMapping(value = "/getBookingByCustomerId/{customerId}", method = RequestMethod.GET)
 	public ResponseEntity<?> getBookingByCustomerId(@PathVariable("customerId") Integer customerId) {
 		logger.debug("INSIDE getBookingByCustomerId");
 		try {
@@ -89,7 +89,7 @@ public class BookingController {
 	 * 
 	 * @param response, the HttpServletResponse object
 	 */
-	@RequestMapping(value = "/updateExistingBooking/bookingId={bookingId}", method = RequestMethod.PUT, consumes = "application/json")
+	@RequestMapping(value = "/updateExistingBooking/{bookingId}", method = RequestMethod.PUT, consumes = "application/json")
 	public ResponseEntity<?> updateExistingBooking(@PathVariable("bookingId") Integer bookingId,
 			@RequestBody @Valid BookingDetailsDTO bookingDetailsDTO) {
 		logger.debug("INSIDE updateExistingBooking");
