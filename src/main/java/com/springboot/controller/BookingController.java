@@ -1,6 +1,7 @@
 package com.springboot.controller;
 
 import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,10 +12,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.springboot.constants.HotelConstants;
 import com.springboot.dto.BookingDetailsDTO;
-import com.springboot.entity.BookingDetails;
-import com.springboot.service.BookingService;
 import com.springboot.dto.CustomerDetailsDTO;
+import com.springboot.entity.BookingDetails;
+import com.springboot.exception.BookingAppCustomException;
+import com.springboot.service.BookingService;
 
 @RestController
 public class BookingController {
@@ -33,17 +37,24 @@ public class BookingController {
 	@RequestMapping(value = "/getBookingByRoomId/{roomId}", method = RequestMethod.GET)
 	public ResponseEntity<?> getBookingByRoomId(@PathVariable("roomId") Integer roomId) {
 		logger.debug("INSIDE getBookingByRoomId");
+		BookingDetails bookingDetails = null;
 		try {
 			logger.debug("Room ID is: " + roomId);
-			BookingDetails bookingDetails = bookingService.getBookingByRoomId(roomId);
-			if (null != bookingDetails)
-				logger.debug("Booking details is NOT NULL");
-			return new ResponseEntity<BookingDetails>(bookingDetails, HttpStatus.OK);
-		} catch (Exception e) {
-			return new ResponseEntity<String>("Booking details not available against the room id",
-					HttpStatus.NOT_FOUND);
+			if (HotelConstants.ZERO < roomId) {
+				bookingDetails = bookingService.getBookingByRoomId(roomId);
+				if (null != bookingDetails) {
+					logger.debug("Booking details is NOT NULL");
+					return new ResponseEntity<BookingDetails>(bookingDetails, HttpStatus.OK);
+				} else {
+					return new ResponseEntity<String>("Booking details not available against the room id",
+							HttpStatus.NOT_FOUND);
+				}
+			} else {
+				return new ResponseEntity<String>("Room ID is not of the correct format", HttpStatus.BAD_REQUEST);
+			}
+		} catch (BookingAppCustomException e) {
+			return new ResponseEntity<String>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-
 	}
 
 	/*
@@ -63,6 +74,8 @@ public class BookingController {
 				logger.debug("Customer id is: " + customerId);
 			}
 			return new ResponseEntity<BookingDetails>(bookingDetails, HttpStatus.OK);
+		} catch (BookingAppCustomException e) {
+			return new ResponseEntity<String>("", HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (Exception e) {
 			return new ResponseEntity<String>("Booking details not available against the customer id",
 					HttpStatus.NOT_FOUND);
@@ -77,10 +90,14 @@ public class BookingController {
 	 * @param response, the HttpServletResponse object
 	 */
 	@RequestMapping(value = "/create", method = RequestMethod.POST, consumes = "application/json")
-	public ResponseEntity<BookingDetailsDTO> createNewBooking(@RequestBody @Valid BookingDetailsDTO bookingDetailsDTO) {
+	public ResponseEntity<?> createNewBooking(@RequestBody @Valid BookingDetailsDTO bookingDetailsDTO) {
 		logger.debug("INSIDE createNewBooking");
-		bookingDetailsDTO = bookingService.createNewBooking(bookingDetailsDTO);
-		return new ResponseEntity<BookingDetailsDTO>(bookingDetailsDTO, HttpStatus.CREATED);
+		try {
+			bookingDetailsDTO = bookingService.createNewBooking(bookingDetailsDTO);
+			return new ResponseEntity<BookingDetailsDTO>(bookingDetailsDTO, HttpStatus.CREATED);
+		} catch (BookingAppCustomException e) {
+			return new ResponseEntity<String>("Internal Server error has occurred", HttpStatus.INTERNAL_SERVER_ERROR);
+		} 
 	}
 
 	/*
@@ -94,18 +111,23 @@ public class BookingController {
 	public ResponseEntity<?> updateExistingBooking(@PathVariable("bookingId") Integer bookingId,
 			@RequestBody @Valid BookingDetailsDTO bookingDetailsDTO) {
 		logger.debug("INSIDE updateExistingBooking");
-		BookingDetails currentBookingDetails = bookingService.getBookingByBookingId(bookingId);
+		BookingDetails currentBookingDetails = null;
+		try {
+			currentBookingDetails = bookingService.getBookingByBookingId(bookingId);
+			if (null == currentBookingDetails) {
+				logger.debug("Current Booking Details is NULL");
+				return new ResponseEntity<String>("Unable to update. No booking found with the booking id ",
+						HttpStatus.NOT_FOUND);
+			} else {
+				CustomerDetailsDTO customerDetailsDTO = bookingDetailsDTO.getCustomerDetailsDTO();
+				// set new customer id
+				currentBookingDetails.setCustomerId(customerDetailsDTO.getCustomerId());
+				bookingService.updateBooking(currentBookingDetails);
+				return new ResponseEntity<BookingDetails>(currentBookingDetails, HttpStatus.OK);
+			}
+		} catch (BookingAppCustomException ex) {
+			return new ResponseEntity<String>("", HttpStatus.INTERNAL_SERVER_ERROR);
 
-		if (null == currentBookingDetails) {
-			logger.debug("Current Booking Details is NULL");
-			return new ResponseEntity<String>("Unable to update. No booking found with the booking id ",
-					HttpStatus.NOT_FOUND);
 		}
-		CustomerDetailsDTO customerDetailsDTO = bookingDetailsDTO.getCustomerDetailsDTO();
-		// set new customer id
-		currentBookingDetails.setCustomerId(customerDetailsDTO.getCustomerId());
-		bookingService.updateBooking(currentBookingDetails);
-		return new ResponseEntity<BookingDetails>(currentBookingDetails, HttpStatus.OK);
-
 	}
 }

@@ -10,5 +10,7 @@ public final class HotelConstants {
 	public final static String SINGLE = "Single";
 	public final static String DOUBLE = "Double";
 	public final static String TRUE = "true";
-
+	public final static String FALSE = "false";
+	public final static int ONE = 1;
+	public final static int ZERO = 0;
 }

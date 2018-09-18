@@ -4,6 +4,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import com.springboot.entity.BookingDetails;
 
+/*
+ * Repository class for Booking Details
+ */
 public interface BookingRepository extends CrudRepository<BookingDetails, Integer>{	
 	
 	@Query("select a from BookingDetails a where a.customerId=?")

@@ -25,14 +25,17 @@ import com.springboot.MyApplication;
 import com.springboot.dto.BookingDetailsDTO;
 import com.springboot.dto.CustomerDetailsDTO;
 import com.springboot.dto.RoomDetailsDTO;
-import com.springboot.entity.RoomDetails;
 
+/*
+ * TEST class for Booking App
+ */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes=MyApplication.class)
 public class BookingDetailsTest {
 
 	@Autowired
 	private WebApplicationContext context;
+	
 	private BookingDetailsDTO bookingDetailsDTO;
 	private CustomerDetailsDTO customerDetailsDTO;
 	private RoomDetailsDTO roomDetailsDTO;
@@ -44,7 +47,7 @@ public class BookingDetailsTest {
 	}
 
 	/*
-	 * 
+	 * Create New Booking Test method
 	 */
 	@Test
 	public void createNewBookingTest() throws Exception {
@@ -87,7 +90,7 @@ public class BookingDetailsTest {
 	}
 
 	/*
-	 * 
+	 * GET booking by Room ID test method 
 	 */
 	@Test
 	public void getBookingByRoomIdTest() throws Exception {
@@ -127,7 +130,7 @@ public class BookingDetailsTest {
 	}
 
 	/*
-	 * 
+	 * GET booking by Customer ID test method 
 	 */
 	@Test
 	public void getBookingByCustomerIdTest() throws Exception {
@@ -172,7 +175,7 @@ public class BookingDetailsTest {
 	}
 
 	/*
-	 * 
+	 * Update Booking by BookingID test method
 	 */
 	@Test
 	public void updateBookingByBookingIdTest() throws Exception {

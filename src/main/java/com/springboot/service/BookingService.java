@@ -2,11 +2,11 @@ package com.springboot.service;
 
 import java.util.List;
 import java.util.Random;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.springboot.constants.HotelConstants;
 import com.springboot.controller.BookingController;
@@ -15,16 +15,22 @@ import com.springboot.dto.CustomerDetailsDTO;
 import com.springboot.dto.RoomDetailsDTO;
 import com.springboot.entity.BookingDetails;
 import com.springboot.entity.Customer;
-import com.springboot.entity.RoomDetails;
+import com.springboot.exception.BookingAppCustomException;
 import com.springboot.repository.BookingRepository;
 import com.springboot.repository.CustomerRepository;
+import com.springboot.repository.RoomRepository;
 
+/*
+ * SERVICE class for Booking App
+ */
 @Service
 public class BookingService {
 	@Autowired
 	private BookingRepository bookingRepository;
 	@Autowired
 	private CustomerRepository customerRepository;
+	@Autowired
+	private RoomRepository roomRepository;
 
 	Logger logger = LoggerFactory.getLogger(BookingController.class);
 
@@ -32,7 +38,7 @@ public class BookingService {
 	 * Method in SERVICE class to get the Booking Details by ROOM id returns
 	 * object of BookingDetails
 	 */
-	public BookingDetails getBookingByRoomId(Integer roomId) {
+	public BookingDetails getBookingByRoomId(Integer roomId) throws BookingAppCustomException {
 		logger.debug("Entering getBookingByRoomId");
 		BookingDetails obj = bookingRepository.getBookingByRoomId(roomId);
 		logger.debug("Exiting getBookingByRoomId");
@@ -43,7 +49,7 @@ public class BookingService {
 	 * Method in SERVICE to get the Booking Details by Booking id returns object
 	 * of BookingDetails
 	 */
-	public BookingDetails getBookingByBookingId(Integer bookingId) {
+	public BookingDetails getBookingByBookingId(Integer bookingId) throws BookingAppCustomException {
 		logger.debug("Entering getBookingByBookingId");
 		BookingDetails obj = bookingRepository.getBookingByBookingId(bookingId);
 		logger.debug("Exiting getBookingByBookingId");
@@ -54,7 +60,7 @@ public class BookingService {
 	 * Method in SERVICE to get the Booking Details by Customer ID returns
 	 * object of BookingDetails
 	 */
-	public BookingDetails getBookingByCustomerId(Integer customerId) {
+	public BookingDetails getBookingByCustomerId(Integer customerId) throws BookingAppCustomException {
 		logger.debug("Entering getBookingByCustomerId");
 		BookingDetails obj = bookingRepository.getBookingByCustomerId(customerId);
 		logger.debug("Exiting getBookingByCustomerId");
@@ -67,7 +73,7 @@ public class BookingService {
 	 * DETAILS returns object of BookingDetailsDTO
 	 */
 
-	public BookingDetailsDTO createNewBooking(BookingDetailsDTO bookingDetailsDTO) {
+	public BookingDetailsDTO createNewBooking(BookingDetailsDTO bookingDetailsDTO) throws BookingAppCustomException {
 		logger.debug("Entering createNewBooking");
 		// Generate random booking id
 		// 9999 is the maximum and the 1000 is our minimum
@@ -83,7 +89,7 @@ public class BookingService {
 		// Entity object for BookingDetailsDTO, RoomDetailsDTO ,
 		// CustomerDetailsDTO
 		BookingDetails bookingDetailsObject = new BookingDetails();
-		RoomDetails roomDetailsObject = new RoomDetails();
+		//RoomDetails roomDetailsObject = new RoomDetails();
 		Customer customerDetailsObject = new Customer();
 
 		// Get the list of rooms from the bookingDetailsDTO
@@ -108,9 +114,11 @@ public class BookingService {
 			bookingDetailsObject.setBookingId(bookingId);
 			bookingDetailsObject.setCustomerId(customerId);
 			bookingDetailsObject.setRoomId(roomDetailsDTO.getId());
-			roomDetailsObject.setAvailability(HotelConstants.FALSE);
-			// updateRoomDetails(roomDetails.getId());
 			bookingRepository.save(bookingDetailsObject);
+			
+			//Update the Room Details table for availability
+			//roomDetailsObject.setAvailability(HotelConstants.FALSE);
+			updateRoomDetails(roomDetailsDTO.getId());
 		}
 		// Update the Customer table with details
 		customerDetailsObject.setCustomerId(customerId);
@@ -121,7 +129,7 @@ public class BookingService {
 		customerDetailsObject.setCheckIn(customerDTO.getCheckIn());
 		customerDetailsObject.setCheckOut(customerDTO.getCheckOut());
 		customerRepository.save(customerDetailsObject);
-
+		
 		// get breakfast cost for the number of members
 		if (HotelConstants.TRUE.equalsIgnoreCase(customerDTO.getBreakfastOption())) {
 			totalBookingCost = totalBookingCost + retrieveCostOfBreakfast(customerDTO);
@@ -138,7 +146,7 @@ public class BookingService {
 	/*
 	 * Method in SERVICE class to Update an existing booking
 	 */
-	public void updateBooking(BookingDetails bookingDetails) {
+	public void updateBooking(BookingDetails bookingDetails) throws BookingAppCustomException{
 		logger.debug("Inside updateBooking method");
 		bookingRepository.save(bookingDetails);
 		logger.debug("Exiting updateBooking");
@@ -149,7 +157,7 @@ public class BookingService {
 	 */
 	public double retrieveCostOfBreakfast(CustomerDetailsDTO customerDetailsDTO) {
 		logger.debug("Inside retrieveCostOfBreakfast");
-		double breakfastCost = customerDetailsDTO.getNoOfMembers() * HotelConstants.BREAKFAST_COST;
+		double breakfastCost = customerDetailsDTO.getNoOfMembers() * HotelConstants.BREAKFAST_COST_TWOFIFTY;
 		logger.debug("Breakfast Cost is: " + breakfastCost);
 		logger.debug("Exiting retrieveCostOfBreakfast");
 		return breakfastCost;
@@ -158,8 +166,9 @@ public class BookingService {
 	/*
 	 * Update availability of Room based on Room Id
 	 */
-	public void updateRoomDetails(Integer roomId) {
-		// bookingRepository.updateRoomDetails(roomId);
+	@Transactional
+	public void updateRoomDetails(Integer id) {
+		roomRepository.updateRoomDetails(id);
 
 	}
 

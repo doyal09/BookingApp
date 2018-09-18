@@ -1,10 +1,6 @@
 package com.springboot.dto;
 
-import java.sql.Date;
 import java.util.List;
-
-import com.springboot.entity.*;
-
 
 public class BookingDetailsDTO {
 	
