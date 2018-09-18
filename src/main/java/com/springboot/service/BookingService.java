@@ -6,8 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.springboot.constants.HotelConstants;
 import com.springboot.controller.BookingController;
 import com.springboot.dto.BookingDetailsDTO;
@@ -15,6 +13,7 @@ import com.springboot.dto.CustomerDetailsDTO;
 import com.springboot.dto.RoomDetailsDTO;
 import com.springboot.entity.BookingDetails;
 import com.springboot.entity.Customer;
+import com.springboot.entity.RoomDetails;
 import com.springboot.exception.BookingAppCustomException;
 import com.springboot.repository.BookingRepository;
 import com.springboot.repository.CustomerRepository;
@@ -89,7 +88,7 @@ public class BookingService {
 		// Entity object for BookingDetailsDTO, RoomDetailsDTO ,
 		// CustomerDetailsDTO
 		BookingDetails bookingDetailsObject = new BookingDetails();
-		//RoomDetails roomDetailsObject = new RoomDetails();
+		RoomDetails roomDetailsObject = new RoomDetails();
 		Customer customerDetailsObject = new Customer();
 
 		// Get the list of rooms from the bookingDetailsDTO
@@ -117,8 +116,9 @@ public class BookingService {
 			bookingRepository.save(bookingDetailsObject);
 			
 			//Update the Room Details table for availability
-			//roomDetailsObject.setAvailability(HotelConstants.FALSE);
-			updateRoomDetails(roomDetailsDTO.getId());
+			roomDetailsObject.setId(roomDetailsDTO.getId());
+			roomDetailsObject.setAvailability(HotelConstants.FALSE);
+			updateRoomDetails(roomDetailsObject);
 		}
 		// Update the Customer table with details
 		customerDetailsObject.setCustomerId(customerId);
@@ -166,9 +166,8 @@ public class BookingService {
 	/*
 	 * Update availability of Room based on Room Id
 	 */
-	@Transactional
-	public void updateRoomDetails(Integer id) {
-		roomRepository.updateRoomDetails(id);
+	public void updateRoomDetails(RoomDetails roomDetailsObject) {
+		roomRepository.save(roomDetailsObject);
 
 	}
 
