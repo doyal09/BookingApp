@@ -3,7 +3,6 @@ package com.springboot.entity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 
 /**
@@ -16,43 +15,25 @@ import javax.persistence.Table;
 public class RoomDetails {
 
 	@Id
-	@JoinColumn(name = "id", nullable = false)
-	private Integer id;
+	@Column(name = "roomId", nullable = false)
+	private Integer roomId;
 	@Column(name = "size")
 	private String size;
-	@Column(name = "availability")
-	private String availability;
 
 	/*
 	 * Get ID of Room
 	 * return Integer id
 	 */
-	public Integer getId() {
-		return id;
+	public Integer getRoomId() {
+		return roomId;
 	}
 
 	/*
 	 * Sets ID of Room
 	 * @param id
 	 */
-	public void setId(Integer id) {
-		this.id = id;
-	}
-
-	/*
-	 * Get availability of Room
-	 * return String availability
-	 */
-	public String getAvailability() {
-		return availability;
-	}
-
-	/*
-	 * Sets availability of room
-	 * @param availability
-	 */
-	public void setAvailability(String availability) {
-		this.availability = availability;
+	public void setRoomId(Integer roomId) {
+		this.roomId = roomId;
 	}
 
 	/*

@@ -17,9 +17,13 @@ import com.springboot.constants.HotelConstants;
 import com.springboot.dto.BookingDetailsDTO;
 import com.springboot.dto.CustomerDetailsDTO;
 import com.springboot.entity.BookingDetails;
+import com.springboot.entity.Customer;
 import com.springboot.exception.BookingAppCustomException;
 import com.springboot.service.BookingService;
 
+/*
+ * CONTROLLER class for the Booking App
+ */
 @RestController
 public class BookingController {
 
@@ -56,6 +60,7 @@ public class BookingController {
 			return new ResponseEntity<String>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
+
 
 	/*
 	 * Method that handles the query against a Customer id.
@@ -121,7 +126,9 @@ public class BookingController {
 			} else {
 				CustomerDetailsDTO customerDetailsDTO = bookingDetailsDTO.getCustomerDetailsDTO();
 				// set new customer id
-				currentBookingDetails.setCustomerId(customerDetailsDTO.getCustomerId());
+				Customer customer = new Customer();
+				customer.setCustomerId(customerDetailsDTO.getCustomerId());
+				currentBookingDetails.setCustomer(customer);
 				bookingService.updateBooking(currentBookingDetails);
 				return new ResponseEntity<BookingDetails>(currentBookingDetails, HttpStatus.OK);
 			}

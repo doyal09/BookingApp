@@ -6,6 +6,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Table;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 
 /**
  * Model class for the BookingDetails table.
@@ -22,10 +24,12 @@ public class BookingDetails {
 	private Integer id;
 	@Column(name = "bookingId", nullable=false)
 	private Integer bookingId;
-	@Column(name = "customerId")
-	private Integer customerId;
+	@ManyToOne
 	@JoinColumn(name = "roomId")
-	private Integer roomId;
+	private RoomDetails roomDetails;
+	@OneToOne
+	@JoinColumn(name = "customerId")
+	private Customer customer;
 	
 	/*
 	 * Constructor of BookingDetails Entity class
@@ -67,35 +71,35 @@ public class BookingDetails {
 	}
 	
 	/*
-	 * Getting the Customer id
-	 * retuens customerId
+	 * Getting the RoomDetails
+	 * return RoomDetails roomDetails
 	 */
-	public Integer getCustomerId() {
-		return customerId;
+	public RoomDetails getRoomDetails() {
+		return roomDetails;
+	}
+
+	/*
+	 * Setting the RoomDetails
+	 * @param roomDetails
+	 */
+	public void setRoomDetails(RoomDetails roomDetails) {
+		this.roomDetails = roomDetails;
 	}
 	
 	/*
-	 * Setting the CustomerId
-	 * @param Integer customerId
+	 * Getting the Customer
+	 * return Object of Customer customer 
 	 */
-	public void setCustomerId(Integer customerId) {
-		this.customerId = customerId;
+	public Customer getCustomer() {
+		return customer;
 	}
-	
+
 	/*
-	 * Getting the RoomId
-	 * returns the roomId
+	 * Setting Customer
+	 * @param Customer customer
 	 */
-	public Integer getRoomId() {
-		return roomId;
-	}
-	
-	/*
-	 * Setting the Room Id
-	 * @param roomId
-	 */
-	public void setRoomId(Integer roomId) {
-		this.roomId = roomId;
+	public void setCustomer(Customer customer) {
+		this.customer = customer;
 	}
 	
 

@@ -17,7 +17,6 @@ import com.springboot.entity.RoomDetails;
 import com.springboot.exception.BookingAppCustomException;
 import com.springboot.repository.BookingRepository;
 import com.springboot.repository.CustomerRepository;
-import com.springboot.repository.RoomRepository;
 
 /*
  * SERVICE class for Booking App
@@ -28,8 +27,6 @@ public class BookingService {
 	private BookingRepository bookingRepository;
 	@Autowired
 	private CustomerRepository customerRepository;
-	@Autowired
-	private RoomRepository roomRepository;
 
 	Logger logger = LoggerFactory.getLogger(BookingController.class);
 
@@ -78,48 +75,24 @@ public class BookingService {
 		// 9999 is the maximum and the 1000 is our minimum
 
 		double totalBookingCost = 0.0;
-
-		Random rand = new Random();
-		int bookingId = rand.nextInt(9999) + 1000;
+		Random rndm = new Random();
+		int bookingId = rndm.nextInt(9999) + 1000;
 		int customerId = bookingId + HotelConstants.ONE;
 		logger.debug("Booking ID is:  " + bookingId);
 		logger.debug("Customer ID is: " + customerId);
 
 		// Entity object for BookingDetailsDTO, RoomDetailsDTO ,
 		// CustomerDetailsDTO
-		BookingDetails bookingDetailsObject = new BookingDetails();
+		BookingDetails bookingDetailsObject = null;
 		RoomDetails roomDetailsObject = new RoomDetails();
 		Customer customerDetailsObject = new Customer();
-
+		customerDetailsObject.setCustomerId(customerId);
+		
 		// Get the list of rooms from the bookingDetailsDTO
 		List<RoomDetailsDTO> rooms = bookingDetailsDTO.getRoomDetailsDTO();
 		// Get the customer details from the bookingDetailsDTO
 		CustomerDetailsDTO customerDTO = bookingDetailsDTO.getCustomerDetailsDTO();
 		customerDTO.setCustomerId(customerId);
-		for (RoomDetailsDTO roomDetailsDTO : rooms) {
-			if (HotelConstants.SINGLE.equalsIgnoreCase(roomDetailsDTO.getSize())
-					&& HotelConstants.TRUE.equalsIgnoreCase(roomDetailsDTO.getAvailability())) {
-				logger.debug("RoomType is: " + roomDetailsDTO.getSize() + "and Room Availability is: "
-						+ roomDetailsDTO.getAvailability());
-				totalBookingCost = totalBookingCost + HotelConstants.SINGLE_PRICE;
-				logger.debug("Total booking Cost in if part is : " + totalBookingCost);
-			} else {
-				logger.debug("RoomType is: " + roomDetailsDTO.getSize() + "and Room Availability is: "
-						+ roomDetailsDTO.getAvailability());
-				totalBookingCost = totalBookingCost + HotelConstants.DOUBLE_PRICE;
-				logger.debug("Total booking Cost in else part : " + totalBookingCost);
-			}
-
-			bookingDetailsObject.setBookingId(bookingId);
-			bookingDetailsObject.setCustomerId(customerId);
-			bookingDetailsObject.setRoomId(roomDetailsDTO.getId());
-			bookingRepository.save(bookingDetailsObject);
-			
-			//Update the Room Details table for availability
-			roomDetailsObject.setId(roomDetailsDTO.getId());
-			roomDetailsObject.setAvailability(HotelConstants.FALSE);
-			updateRoomDetails(roomDetailsObject);
-		}
 		// Update the Customer table with details
 		customerDetailsObject.setCustomerId(customerId);
 		customerDetailsObject.setCustomerFirstName(customerDTO.getCustFirstName());
@@ -130,15 +103,40 @@ public class BookingService {
 		customerDetailsObject.setCheckOut(customerDTO.getCheckOut());
 		customerRepository.save(customerDetailsObject);
 		
+		for (RoomDetailsDTO roomDetailsDTO : rooms) {
+			bookingDetailsObject = bookingRepository.getAvailability(roomDetailsDTO.getId(), customerDTO.getCheckIn(),
+					customerDTO.getCheckOut());
+			if (null == bookingDetailsObject) {
+				logger.debug("Room is available");
+				if (HotelConstants.SINGLE.equalsIgnoreCase(roomDetailsDTO.getSize())) {
+					logger.debug("RoomType is: " + roomDetailsDTO.getSize());
+					totalBookingCost = totalBookingCost + HotelConstants.SINGLE_PRICE;
+					logger.debug("Total booking Cost in if part is : " + totalBookingCost);
+				} else {
+					logger.debug("RoomType is: " + roomDetailsDTO.getSize());
+					totalBookingCost = totalBookingCost + HotelConstants.DOUBLE_PRICE;
+					logger.debug("Total booking Cost in else part : " + totalBookingCost);
+				}
+				roomDetailsObject.setRoomId(roomDetailsDTO.getId());
+				bookingDetailsObject = new BookingDetails();
+				bookingDetailsObject.setBookingId(bookingId);
+				bookingDetailsObject.setRoomDetails(roomDetailsObject);
+				bookingDetailsObject.setCustomer(customerDetailsObject);
+				bookingRepository.save(bookingDetailsObject);
+			} else {
+				logger.debug("Room NOT Available");
+			}
+		}
+		
 		// get breakfast cost for the number of members
 		if (HotelConstants.TRUE.equalsIgnoreCase(customerDTO.getBreakfastOption())) {
-			totalBookingCost = totalBookingCost + retrieveCostOfBreakfast(customerDTO);
+			totalBookingCost = totalBookingCost + retrieveCostOfBreakfast(customerDTO.getNoOfMembers());
 			logger.debug("Total Booking cost after inclusion of Breakfast is: " + totalBookingCost);
 		}
 		// return the DTO with bookingId and total booking cost
 		bookingDetailsDTO.setBookingId(bookingId);
 		bookingDetailsDTO.setTotalCost(totalBookingCost);
-		bookingDetailsDTO.setCustomerId(customerId);
+		bookingDetailsDTO.setCustomerDetailsDTO(customerDTO);
 		logger.debug("Exiting createNewBooking");
 		return bookingDetailsDTO;
 	}
@@ -155,20 +153,12 @@ public class BookingService {
 	/*
 	 * Method in SERVICE class to retrieve breakfast inclusion cost
 	 */
-	public double retrieveCostOfBreakfast(CustomerDetailsDTO customerDetailsDTO) {
+	public double retrieveCostOfBreakfast(int noOfMembers) {
 		logger.debug("Inside retrieveCostOfBreakfast");
-		double breakfastCost = customerDetailsDTO.getNoOfMembers() * HotelConstants.BREAKFAST_COST_TWOFIFTY;
+		double breakfastCost = noOfMembers * HotelConstants.BREAKFAST_COST_TWOFIFTY;
 		logger.debug("Breakfast Cost is: " + breakfastCost);
 		logger.debug("Exiting retrieveCostOfBreakfast");
 		return breakfastCost;
-	}
-
-	/*
-	 * Update availability of Room based on Room Id
-	 */
-	public void updateRoomDetails(RoomDetails roomDetailsObject) {
-		roomRepository.save(roomDetailsObject);
-
 	}
 
 }

@@ -2,10 +2,12 @@ package com.springboot.dto;
 
 import java.util.List;
 
+/*
+ * DTO class for Booking Details
+ */
 public class BookingDetailsDTO {
 	
 	private Integer bookingId;
-	private Integer customerId;
 	private List<RoomDetailsDTO> roomDetailsDTO;
 	private CustomerDetailsDTO customerDetailsDTO;
 	private double totalCost;
@@ -25,23 +27,6 @@ public class BookingDetailsDTO {
 	public void setBookingId(Integer bookingId) {
 		this.bookingId = bookingId;
 	}
-	
-	/*
-	 * Getting the customerId
-	 * returns Integer customerId
-	 */
-	public Integer getCustomerId() {
-		return customerId;
-	}
-	
-	/*
-	 * Setting the customerId
-	 * @param Integer customerId
-	 */
-	public void setCustomerId(Integer customerId) {
-		this.customerId = customerId;
-	}
-	
 	
 	/*
 	 * Getting the RoomDetails
